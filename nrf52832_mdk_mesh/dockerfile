@@ -1,0 +1,30 @@
+FROM ubuntu:20.04
+
+RUN apt-get -y update && apt-get -y upgrade
+RUN apt-get -y --no-install-recommends install wget vim tzdata
+    
+RUN TZ=Asia/Taipei \
+    && ln -snf /usr/share/zoneinfo/$TZ /etc/localtime \
+    && echo $TZ > /etc/timezone \
+    && dpkg-reconfigure -f noninteractive tzdata 
+
+RUN apt-get install -y --no-install-recommends git build-essential cmake doxygen graphviz mscgen ninja-build python3-pip libusb-1.0-0
+
+RUN wget https://developer.arm.com/-/media/Files/downloads/gnu-rm/6-2017q2/gcc-arm-none-eabi-6-2017-q2-update-linux.tar.bz2
+RUN tar -jxf gcc-arm-none-eabi-6-2017-q2-update-linux.tar.bz2
+RUN touch /root/.bashrc \
+    && echo 'export PATH=$PATH:/gcc-arm-none-eabi-6-2017-q2-update/bin/' >> /root/.bashrc
+RUN rm gcc-arm-none-eabi-6-2017-q2-update-linux.tar.bz2
+
+RUN wget https://www.nordicsemi.com/-/media/Software-and-other-downloads/Desktop-software/nRF-command-line-tools/sw/Versions-10-x-x/10-16-0/nrf-command-line-tools_10.16.0_amd64.deb
+RUN dpkg -i nrf-command-line-tools_10.16.0_amd64.deb
+RUN rm nrf-command-line-tools_10.16.0_amd64.deb
+
+RUN python3 -mpip install -U pyocd
+RUN python3 install python3-pyocd
+
+VOLUME [ "/app" ]
+
+WORKDIR /app
+CMD [ "bash" ]
+
